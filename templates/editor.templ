@@ -1,0 +1,238 @@
+package templates
+
+import (
+	"github.com/templui/templui/components/card"
+	"github.com/templui/templui/components/button"
+)
+
+templ Editor() {
+	<div class="h-full flex flex-col p-4 md:p-6 bg-muted/30" x-data="{ activeTab: 'response' }">
+		<template x-if="!selectedConfig">
+			<div class="flex-1 flex flex-col items-center justify-center text-center p-12">
+				<div class="w-12 h-12 rounded-full bg-secondary flex items-center justify-center mb-4 text-muted-foreground">
+					<i class="ri-code-s-slash-line text-2xl"></i>
+				</div>
+				<h3 class="text-lg font-semibold mb-1">No Selection</h3>
+				<p class="text-sm text-muted-foreground max-w-[250px]">Select a mock from the sidebar to start editing its configuration.</p>
+			</div>
+		</template>
+
+		<template x-if="selectedConfig">
+			<div class="flex-1 flex flex-col min-h-0">
+				@card.Card(card.Props{
+					Class: "flex-1 flex flex-col overflow-hidden border-none shadow-sm",
+				}) {
+					<!-- Editor Header -->
+					@card.Header(card.HeaderProps{
+						Class: "border-b px-6 py-4 space-y-4",
+					}) {
+						<div class="flex items-center justify-between">
+							<div class="flex items-center gap-3 flex-1 min-w-0">
+								<select x-model="configs[selectedIndex].method" 
+									:class="getMethodBadgeClass(configs[selectedIndex].method)"
+									class="appearance-none h-8 px-3 rounded-md font-bold font-mono text-[10px] border border-input bg-background uppercase pr-8 focus:outline-none focus:ring-1 focus:ring-ring transition-all cursor-pointer">
+									<template x-for="m in ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD']" :key="m">
+										<option :value="m" x-text="m"></option>
+									</template>
+								</select>
+								<input type="text" x-model="configs[selectedIndex].name"
+									class="text-lg font-bold bg-transparent border-none focus:outline-none focus:ring-1 focus:ring-ring/20 rounded px-1 -ml-1 flex-1 truncate"
+									placeholder="Untitled Mock" />
+							</div>
+							<div class="flex items-center gap-2">
+								@button.Button(button.Props{
+									Variant: button.VariantGhost,
+									Size:    button.SizeSm,
+									Class:   "text-destructive hover:text-destructive hover:bg-destructive/10",
+									Attributes: templ.Attributes{
+										"@click": "deleteCurrentConfig()",
+									},
+								}) {
+									<i class="ri-delete-bin-7-line mr-2"></i>
+									<span>Delete</span>
+								}
+							</div>
+						</div>
+						<div class="flex items-center gap-2 bg-muted/50 px-3 py-1.5 rounded-md border text-[11px] font-mono">
+							<span class="text-muted-foreground font-bold uppercase tracking-widest">Path:</span>
+							<input type="text" x-model="configs[selectedIndex].path"
+								class="bg-transparent border-none focus:outline-none flex-1 p-0 h-auto text-foreground font-medium"
+								placeholder="/api/example" />
+						</div>
+					}
+
+					@card.Content(card.ContentProps{
+						Class: "flex-1 overflow-y-auto p-6 custom-scrollbar space-y-8",
+					}) {
+						<!-- Tabs -->
+						<div class="flex border-b w-full mb-6">
+							<button class="px-4 py-2 text-xs font-semibold border-b-2 transition-all -mb-px"
+								:class="activeTab === 'response' ? 'border-primary text-foreground' : 'border-transparent text-muted-foreground hover:text-foreground'"
+								@click="activeTab = 'response'">Standard Response</button>
+							<button class="px-4 py-2 text-xs font-semibold border-b-2 transition-all -mb-px"
+								:class="activeTab === 'rules' ? 'border-primary text-foreground' : 'border-transparent text-muted-foreground hover:text-foreground'"
+								@click="activeTab = 'rules'">Conditional Logic</button>
+						</div>
+
+						<!-- Response Tab -->
+						<div x-show="activeTab === 'response'" class="space-y-8">
+							<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+								<div class="space-y-2">
+									<label class="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Status Code</label>
+									<input type="number" x-model="selectedConfig.statusCode"
+										class="w-full h-9 bg-background border border-input rounded-md px-3 text-sm focus:ring-1 focus:ring-ring outline-none" />
+								</div>
+								<div class="space-y-2">
+									<label class="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Delay (ms)</label>
+									<input type="number" x-model="selectedConfig.timeout"
+										class="w-full h-9 bg-background border border-input rounded-md px-3 text-sm focus:ring-1 focus:ring-ring outline-none" />
+								</div>
+							</div>
+
+							<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+								<div class="space-y-2 relative group/field">
+									<div class="flex items-center justify-between">
+										<label class="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Response Headers</label>
+										<button @click="beautifyJSON('responseHeaders')" class="text-[9px] font-bold text-primary opacity-0 group-hover/field:opacity-100 transition-opacity">PRETTIFY</button>
+									</div>
+									<textarea x-model="selectedConfig.responseHeaders"
+										class="w-full h-32 bg-background border border-input rounded-md p-3 font-mono text-xs focus:ring-1 focus:ring-ring outline-none resize-none"></textarea>
+								</div>
+								<div class="space-y-2 relative group/field">
+									<div class="flex items-center justify-between">
+										<label class="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Response Body</label>
+										<button @click="beautifyJSON('responseBody')" class="text-[9px] font-bold text-primary opacity-0 group-hover/field:opacity-100 transition-opacity">PRETTIFY</button>
+									</div>
+									<textarea x-model="selectedConfig.responseBody"
+										class="w-full h-32 lg:h-64 bg-background border border-input rounded-md p-3 font-mono text-xs focus:ring-1 focus:ring-ring outline-none resize-none"></textarea>
+								</div>
+							</div>
+
+							<div class="pt-4 border-t space-y-4">
+								<h4 class="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Optional Validation</h4>
+								<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+									<div class="space-y-2 relative group/field">
+										<div class="flex items-center justify-between">
+											<label class="text-[10px] font-bold text-muted-foreground">Required Headers</label>
+											<button @click="beautifyJSON('requestHeaders')" class="text-[9px] font-bold text-primary opacity-0 group-hover/field:opacity-100 transition-opacity">PRETTIFY</button>
+										</div>
+										<textarea x-model="selectedConfig.requestHeaders"
+											class="w-full h-24 bg-muted/30 border border-input rounded-md p-3 font-mono text-xs focus:ring-1 focus:ring-ring outline-none resize-none"></textarea>
+									</div>
+									<div class="space-y-2 relative group/field">
+										<div class="flex items-center justify-between">
+											<label class="text-[10px] font-bold text-muted-foreground">Required Body</label>
+											<button @click="beautifyJSON('requestBody')" class="text-[9px] font-bold text-primary opacity-0 group-hover/field:opacity-100 transition-opacity">PRETTIFY</button>
+										</div>
+										<textarea x-model="selectedConfig.requestBody"
+											class="w-full h-24 bg-muted/30 border border-input rounded-md p-3 font-mono text-xs focus:ring-1 focus:ring-ring outline-none resize-none"></textarea>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<!-- Rules Tab -->
+						<div x-show="activeTab === 'rules'" class="space-y-6">
+							<div class="flex items-center justify-between">
+								<h3 class="text-sm font-semibold">Conditional Responses</h3>
+								@button.Button(button.Props{
+									Variant: button.VariantOutline,
+									Size:    button.SizeSm,
+									Attributes: templ.Attributes{
+										"@click": "addConditionalResponse()",
+									},
+								}) {
+									<i class="ri-add-line mr-2"></i> Add Rule
+								}
+							</div>
+
+							<div class="space-y-6">
+								<template x-for="(resp, idx) in selectedConfig.responses || []" :key="idx">
+									@card.Card(card.Props{
+										Class: "border border-border/50",
+									}) {
+										<div class="p-4 border-b flex items-center justify-between bg-muted/20">
+											<div class="flex items-center gap-4 flex-1">
+												<input type="text" x-model="resp.name"
+													class="bg-transparent border-none focus:ring-1 focus:ring-ring/20 rounded font-bold text-sm px-1 flex-1" />
+												<div class="flex items-center gap-2 border rounded-md px-2 bg-background h-8">
+													<span class="text-[10px] font-bold text-muted-foreground">MATCH:</span>
+													<select x-model="resp.ruleOperator" class="bg-transparent border-none text-[10px] font-bold focus:ring-0 outline-none">
+														<option value="AND">ALL (AND)</option>
+														<option value="OR">ANY (OR)</option>
+													</select>
+												</div>
+											</div>
+											<button @click="deleteConditionalResponse(idx)" class="text-muted-foreground hover:text-destructive transition-colors ml-4">
+												<i class="ri-delete-bin-7-line"></i>
+											</button>
+										</div>
+										<div class="p-6 space-y-6">
+											<!-- Clauses -->
+											<div class="space-y-3">
+												<div class="flex items-center justify-between mb-2">
+													<label class="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Conditions</label>
+													<button @click="addRule(idx)" class="text-[10px] font-bold text-primary hover:underline">Add Clause</button>
+												</div>
+												<template x-for="(rule, ridx) in resp.rules || []" :key="ridx">
+													<div class="flex items-center gap-2">
+														<select x-model="rule.target" class="h-8 border border-input rounded bg-background text-[10px] px-2 outline-none">
+															<option value="body">Body</option>
+															<option value="header">Header</option>
+															<option value="query">Query</option>
+														</select>
+														<input type="text" x-model="rule.field" placeholder="Field" class="h-8 border border-input rounded bg-background text-[10px] px-2 flex-1 outline-none" />
+														<select x-model="rule.operator" class="h-8 border border-input rounded bg-background text-[10px] px-2 outline-none">
+															<option value="equals">==</option>
+															<option value="not_equals">!=</option>
+															<option value="contains">Contains</option>
+															<option value="regex">Regex</option>
+														</select>
+														<input type="text" x-model="rule.value" placeholder="Value" class="h-8 border border-input rounded bg-background text-[10px] px-2 flex-1 outline-none" />
+														<button @click="deleteRule(idx, ridx)" class="text-muted-foreground hover:text-destructive p-1">
+															<i class="ri-close-line"></i>
+														</button>
+													</div>
+												</template>
+											</div>
+
+											<!-- Response for this rule -->
+											<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-4 border-t">
+												<div class="space-y-4">
+													<div class="grid grid-cols-2 gap-4">
+														<div class="space-y-1">
+															<label class="text-[9px] font-bold text-muted-foreground">Status</label>
+															<input type="number" x-model="resp.response.statusCode" class="w-full h-8 border border-input rounded px-2 text-xs" />
+														</div>
+														<div class="space-y-1">
+															<label class="text-[9px] font-bold text-muted-foreground">Delay</label>
+															<input type="number" x-model="resp.response.timeout" class="w-full h-8 border border-input rounded px-2 text-xs" />
+														</div>
+													</div>
+													<div class="space-y-1 group/field relative">
+														<div class="flex items-center justify-between">
+															<label class="text-[9px] font-bold text-muted-foreground">Headers</label>
+															<button @click="beautifyConditionalJSON(idx, 'headers')" class="text-[8px] font-bold text-primary opacity-0 group-hover/field:opacity-100">PRETTIFY</button>
+														</div>
+														<textarea x-model="resp.response.headers" class="w-full h-24 border border-input rounded p-2 font-mono text-[10px] resize-none outline-none"></textarea>
+													</div>
+												</div>
+												<div class="space-y-1 group/field relative">
+													<div class="flex items-center justify-between">
+														<label class="text-[9px] font-bold text-muted-foreground">Body</label>
+														<button @click="beautifyConditionalJSON(idx, 'body')" class="text-[8px] font-bold text-primary opacity-0 group-hover/field:opacity-100">PRETTIFY</button>
+													</div>
+													<textarea x-model="resp.response.body" class="w-full h-full min-h-[150px] border border-input rounded p-2 font-mono text-[10px] resize-none outline-none"></textarea>
+												</div>
+											</div>
+										</div>
+									}
+								</template>
+							</div>
+						</div>
+					}
+				}
+			</div>
+		</template>
+	</div>
+}

@@ -1,0 +1,27 @@
+package templates
+
+import (
+	"gopher-mock/model"
+	"github.com/templui/templui/components/sidebar"
+)
+
+templ Index(configs []model.MockConfig) {
+	@Layout("GopherMock | Premium API Mocking") {
+		@Scripts(configs)
+		<div x-data="configManager()" x-init="init()" class="h-screen overflow-hidden">
+			@sidebar.Layout() {
+				@Sidebar()
+				@sidebar.Inset() {
+					<div class="flex flex-col h-full">
+						@Navbar()
+						<main class="flex-1 overflow-hidden relative">
+							@Editor()
+						</main>
+					</div>
+				}
+			}
+			@Features()
+			@Modals()
+		</div>
+	}
+}

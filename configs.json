@@ -8,13 +8,7 @@
     "responseHeaders": {},
     "responseBody": {},
     "statusCode": 200,
-    "timeout": 200,
-    "defaultResponse": {
-      "headers": {},
-      "body": {},
-      "statusCode": 200,
-      "timeout": 0
-    }
+    "timeout": 200
   },
   {
     "name": "Test2",
@@ -54,15 +48,7 @@
           "timeout": 200
         }
       }
-    ],
-    "defaultResponse": {
-      "headers": {},
-      "body": {
-        "data": true
-      },
-      "statusCode": 200,
-      "timeout": 0
-    }
+    ]
   },
   {
     "name": "Path params coba aja banyakin ahhh",
@@ -76,13 +62,7 @@
       "id": "{{path.id}}"
     },
     "statusCode": 200,
-    "timeout": 0,
-    "defaultResponse": {
-      "headers": {},
-      "body": {},
-      "statusCode": 200,
-      "timeout": 0
-    }
+    "timeout": 0
   },
   {
     "name": "Get",
@@ -109,13 +89,7 @@
       "TotalAmount": "0.00"
     },
     "statusCode": 200,
-    "timeout": 0,
-    "defaultResponse": {
-      "headers": {},
-      "body": {},
-      "statusCode": 200,
-      "timeout": 0
-    }
+    "timeout": 0
   },
   {
     "name": "Test 3",
@@ -128,13 +102,7 @@
       "data": "success"
     },
     "statusCode": 200,
-    "timeout": 0,
-    "defaultResponse": {
-      "headers": {},
-      "body": {},
-      "statusCode": 200,
-      "timeout": 0
-    }
+    "timeout": 0
   },
   {
     "name": "Api Test 4",
@@ -147,13 +115,7 @@
       "data": "ok"
     },
     "statusCode": 200,
-    "timeout": 0,
-    "defaultResponse": {
-      "headers": {},
-      "body": {},
-      "statusCode": 200,
-      "timeout": 0
-    }
+    "timeout": 0
   },
   {
     "name": "Get current user's cart [GET cart]",
@@ -164,20 +126,7 @@
     "responseHeaders": {},
     "responseBody": {},
     "statusCode": 200,
-    "timeout": 0,
-    "defaultResponse": {
-      "headers": {},
-      "body": {
-        "items": [
-          {
-            "product_id": "{{faker.uuid}}",
-            "quantity": 0
-          }
-        ]
-      },
-      "statusCode": 200,
-      "timeout": 0
-    }
+    "timeout": 0
   },
   {
     "name": "Add item to cart [POST items]",
@@ -191,15 +140,7 @@
     "responseHeaders": {},
     "responseBody": {},
     "statusCode": 200,
-    "timeout": 0,
-    "defaultResponse": {
-      "headers": {},
-      "body": {
-        "description": "Item added to cart"
-      },
-      "statusCode": 200,
-      "timeout": 0
-    }
+    "timeout": 0
   },
   {
     "name": "List all products with filters [GET products]",
@@ -210,27 +151,7 @@
     "responseHeaders": {},
     "responseBody": {},
     "statusCode": 200,
-    "timeout": 0,
-    "defaultResponse": {
-      "headers": {},
-      "body": {
-        "items": [
-          {
-            "category": "wrong",
-            "created_at": "{{faker.date}}",
-            "description": "Mr street sell would civil. People through shake southern force.",
-            "id": "eda5cbc1-a615-4da5-ae73-4a33a9acfb6a",
-            "image_url": "https://dummyimage.com/766x809",
-            "name": "Worry Management",
-            "price": 91.37,
-            "stock": 94,
-            "updated_at": "{{faker.date}}"
-          }
-        ]
-      },
-      "statusCode": 200,
-      "timeout": 0
-    }
+    "timeout": 0
   },
   {
     "name": "List your past orders [GET orders]",
@@ -241,28 +162,7 @@
     "responseHeaders": {},
     "responseBody": {},
     "statusCode": 200,
-    "timeout": 0,
-    "defaultResponse": {
-      "headers": {},
-      "body": {
-        "items": [
-          {
-            "created_at": "{{faker.date}}",
-            "id": "{{faker.uuid}}",
-            "items": [
-              {
-                "product_id": "{{faker.uuid}}",
-                "quantity": 0
-              }
-            ],
-            "status": "{{faker.name}}",
-            "total_amount": 0
-          }
-        ]
-      },
-      "statusCode": 200,
-      "timeout": 0
-    }
+    "timeout": 0
   },
   {
     "name": "Get order details [GET orders]",
@@ -273,24 +173,7 @@
     "responseHeaders": {},
     "responseBody": {},
     "statusCode": 200,
-    "timeout": 0,
-    "defaultResponse": {
-      "headers": {},
-      "body": {
-        "created_at": "{{faker.date}}",
-        "id": "{{faker.uuid}}",
-        "items": [
-          {
-            "product_id": "{{faker.uuid}}",
-            "quantity": 0
-          }
-        ],
-        "status": "{{faker.name}}",
-        "total_amount": 0
-      },
-      "statusCode": 200,
-      "timeout": 0
-    }
+    "timeout": 0
   },
   {
     "name": "Login and get access token [POST login]",
@@ -319,15 +202,7 @@
           "timeout": 0
         }
       }
-    ],
-    "defaultResponse": {
-      "headers": {},
-      "body": {
-        "description": "Authenticated successfully"
-      },
-      "statusCode": 200,
-      "timeout": 0
-    }
+    ]
   },
   {
     "name": "Create a new user account [POST register]",
@@ -364,15 +239,7 @@
           "timeout": 0
         }
       }
-    ],
-    "defaultResponse": {
-      "headers": {},
-      "body": {
-        "description": "User created"
-      },
-      "statusCode": 201,
-      "timeout": 0
-    }
+    ]
   },
   {
     "name": "Checkout and place order [POST checkout]",
@@ -386,24 +253,7 @@
     "responseHeaders": {},
     "responseBody": {},
     "statusCode": 200,
-    "timeout": 0,
-    "defaultResponse": {
-      "headers": {},
-      "body": {
-        "created_at": "{{faker.date}}",
-        "id": "{{faker.uuid}}",
-        "items": [
-          {
-            "product_id": "{{faker.uuid}}",
-            "quantity": 0
-          }
-        ],
-        "status": "{{faker.name}}",
-        "total_amount": 0
-      },
-      "statusCode": 201,
-      "timeout": 0
-    }
+    "timeout": 0
   },
   {
     "name": "Get product details by ID [GET products]",
@@ -414,23 +264,7 @@
     "responseHeaders": {},
     "responseBody": {},
     "statusCode": 200,
-    "timeout": 0,
-    "defaultResponse": {
-      "headers": {},
-      "body": {
-        "category": "wrong",
-        "created_at": "{{faker.date}}",
-        "description": "Mr street sell would civil. People through shake southern force.",
-        "id": "eda5cbc1-a615-4da5-ae73-4a33a9acfb6a",
-        "image_url": "https://dummyimage.com/766x809",
-        "name": "Worry Management",
-        "price": 91.37,
-        "stock": 94,
-        "updated_at": "{{faker.date}}"
-      },
-      "statusCode": 200,
-      "timeout": 0
-    }
+    "timeout": 0
   },
   {
     "name": "Get your saved addresses [GET addresses]",
@@ -441,24 +275,7 @@
     "responseHeaders": {},
     "responseBody": {},
     "statusCode": 200,
-    "timeout": 0,
-    "defaultResponse": {
-      "headers": {},
-      "body": {
-        "items": [
-          {
-            "city": "{{faker.name}}",
-            "country": "{{faker.name}}",
-            "line1": "{{faker.name}}",
-            "line2": "{{faker.name}}",
-            "postal_code": "{{faker.name}}",
-            "state": "{{faker.name}}"
-          }
-        ]
-      },
-      "statusCode": 200,
-      "timeout": 0
-    }
+    "timeout": 0
   },
   {
     "name": "Add a new address [POST addresses]",
@@ -476,13 +293,35 @@
     "responseHeaders": {},
     "responseBody": {},
     "statusCode": 200,
+    "timeout": 0
+  },
+  {
+    "name": "New Configuration",
+    "method": "GET",
+    "path": "/api/new/test",
+    "requestHeaders": {},
+    "requestBody": {},
+    "responseHeaders": {},
+    "responseBody": {
+      "data": "success"
+    },
+    "statusCode": 200,
+    "timeout": 0
+  },
+  {
+    "name": "New Configuration",
+    "method": "POST",
+    "path": "/api/test/abc/:id",
+    "requestHeaders": {},
+    "requestBody": {},
+    "responseHeaders": {},
+    "responseBody": {},
+    "statusCode": 200,
     "timeout": 0,
     "defaultResponse": {
       "headers": {},
-      "body": {
-        "description": "Address added"
-      },
-      "statusCode": 201,
+      "body": {},
+      "statusCode": 200,
       "timeout": 0
     }
   }

@@ -1,0 +1,30 @@
+package templates
+
+import (
+	"gopher-mock/model"
+	"encoding/json"
+	"github.com/templui/templui/components/sidebar"
+	"github.com/templui/templui/components/dialog"
+	"github.com/templui/templui/components/input"
+)
+
+func mustMarshal(v interface{}) string {
+	b, _ := json.Marshal(v)
+	return string(b)
+}
+
+templ Scripts(configs []model.MockConfig) {
+	@sidebar.Script()
+	@dialog.Script()
+	@input.Script()
+	
+	<div id="server-configs" style="display: none;">
+		@templ.Raw(mustMarshal(configs))
+	</div>
+	
+	<script src="/static/js/app.js"></script>
+	
+	<script>
+		window.serverConfigs = JSON.parse(document.getElementById('server-configs').textContent);
+	</script>
+}

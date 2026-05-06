@@ -1,0 +1,46 @@
+package templates
+
+import (
+	"github.com/templui/templui/components/button"
+	"github.com/templui/templui/components/sidebar"
+)
+
+templ Navbar() {
+	<nav class="h-14 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 flex items-center justify-between sticky top-0 z-50">
+		<div class="flex items-center gap-3">
+			@sidebar.Trigger()
+			<a href="/" class="flex items-center gap-2">
+				<img src="/static/logo.png" alt="GopherMock" class="h-6 w-6 object-contain"/>
+				<span class="text-sm font-bold tracking-tight">
+					Gopher<span class="text-primary italic">Mock</span>
+				</span>
+			</a>
+		</div>
+
+		<div class="flex items-center gap-2">
+			<button @click="openFeaturesModal()" class="text-xs font-medium text-muted-foreground hover:text-foreground transition-colors px-3 h-8 rounded-md hover:bg-accent">
+				Features
+			</button>
+
+			@button.Button(button.Props{
+				Variant: button.VariantOutline,
+				Size:    button.SizeSm,
+				Class:   "h-8 text-xs font-semibold gap-2",
+				Attributes: templ.Attributes{
+					"@click": "openImportModal()",
+				},
+			}) {
+				<i class="ri-upload-cloud-2-line"></i>
+				<span>Import</span>
+			}
+
+			<div class="h-6 w-px bg-border mx-1"></div>
+
+			<button @click="toggleTheme()" class="h-8 w-8 flex items-center justify-center rounded-md hover:bg-accent text-muted-foreground hover:text-foreground transition-colors">
+				<i class="ri-sun-line text-sm" x-show="isDark"></i>
+				<i class="ri-moon-line text-sm" x-show="!isDark"></i>
+			</button>
+		</div>
+	</nav>
+}
+

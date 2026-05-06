@@ -16,6 +16,7 @@ import (
 	"gopher-mock/config"
 	"gopher-mock/model"
 	"gopher-mock/service"
+	"gopher-mock/templates"
 )
 
 // MockHandler ...
@@ -66,10 +67,8 @@ func (h *MockHandler) Index(c *fiber.Ctx) error {
 		}
 	}
 
-	// log.Printf("Rendering index with %d configs\n", len(h.Configs))
-	return c.Render("index", fiber.Map{
-		"Configs": configs,
-	})
+	c.Set("Content-Type", "text/html")
+	return templates.Index(configs).Render(c.Context(), c.Response().BodyWriter())
 }
 
 // Save ...
@@ -243,6 +242,21 @@ func (h *MockHandler) Dynamic(c *fiber.Ctx) error {
 	configs := h.Configs
 	h.mu.RUnlock()
 
+	// Try to reload if empty (debugging purpose)
+	if len(configs) == 0 {
+		log.Println("Configs empty in Dynamic, attempting to reload from", h.Path)
+		loaded, err := config.LoadConfigs(h.Path)
+		if err == nil && len(loaded) > 0 {
+			h.mu.Lock()
+			h.Configs = loaded
+			configs = h.Configs
+			h.mu.Unlock()
+			log.Println("Reloaded configs in Dynamic:", len(configs))
+		}
+	}
+
+	log.Printf("[Dynamic] %s %s (Configs: %d)", method, path, len(configs))
+
 	for _, cfg := range configs {
 		if cfg.Method == method {
 			if ok, params := pathMatch(cfg.Path, path); ok {
@@ -305,7 +319,8 @@ func (h *MockHandler) Dynamic(c *fiber.Ctx) error {
 		}
 	}
 
-	return c.Status(404).SendString("Mock not found")
+	log.Printf("[Dynamic] No match found for %s %s", method, path)
+	return c.Status(404).SendString(fmt.Sprintf("Mock not found for %s %s", method, path))
 }
 
 // buildRequestContext extracts request data into a RequestContext for rule evaluation

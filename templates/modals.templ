@@ -1,0 +1,155 @@
+package templates
+
+import (
+	"github.com/templui/templui/components/dialog"
+	"github.com/templui/templui/components/button"
+)
+
+templ Modals() {
+	<!-- Success Modal -->
+	@dialog.Dialog(dialog.Props{ID: "success_modal"}) {
+		@dialog.Content(dialog.ContentProps{Class: "sm:max-w-[425px]"}) {
+			@dialog.Header(dialog.HeaderProps{}) {
+				@dialog.Title(dialog.TitleProps{}) { Mission Success }
+				@dialog.Description(dialog.DescriptionProps{}) { 
+					<span x-text="modalMessage"></span>
+				}
+			}
+			<div class="flex flex-col items-center py-6">
+				<div class="w-16 h-16 rounded-full bg-primary/10 text-primary flex items-center justify-center mb-4">
+					<i class="ri-checkbox-circle-line text-3xl"></i>
+				</div>
+			</div>
+			@dialog.Footer(dialog.FooterProps{}) {
+				@dialog.Close(dialog.CloseProps{}) {
+					@button.Button(button.Props{Variant: button.VariantDefault, Class: "w-full"}) { Roger That }
+				}
+			}
+		}
+	}
+
+	<!-- Delete Modal -->
+	@dialog.Dialog(dialog.Props{ID: "delete_modal"}) {
+		@dialog.Content(dialog.ContentProps{Class: "sm:max-w-[425px]"}) {
+			@dialog.Header(dialog.HeaderProps{}) {
+				@dialog.Title(dialog.TitleProps{}) { 
+					<span x-text="isBulkDelete ? 'Nuke Mocks' : 'Delete Mock'"></span>
+				}
+				@dialog.Description(dialog.DescriptionProps{}) {
+					<span x-show="!isBulkDelete">This operation is irreversible. Proceed with deletion?</span>
+					<span x-show="isBulkDelete">Eliminating <span class="text-destructive font-bold" x-text="selectedIndices.length"></span> configurations. Confirm?</span>
+				}
+			}
+			
+			<div x-show="selectedConfig && !isBulkDelete" class="py-4">
+				<div class="bg-muted p-3 rounded-md border text-xs">
+					<p class="font-bold text-muted-foreground uppercase text-[10px] mb-1">Target</p>
+					<p class="font-mono truncate" x-text="selectedConfig?.name"></p>
+				</div>
+			</div>
+
+			@dialog.Footer(dialog.FooterProps{Class: "grid grid-cols-2 gap-2 sm:space-x-0"}) {
+				@dialog.Close(dialog.CloseProps{}) {
+					@button.Button(button.Props{Variant: button.VariantOutline, Class: "w-full"}) { Cancel }
+				}
+				@button.Button(button.Props{
+					Variant: button.VariantDestructive,
+					Class: "w-full",
+					Attributes: templ.Attributes{"@click": "confirmDelete()"},
+				}) { Yes, Purge }
+			}
+		}
+	}
+
+	<!-- Error Modal -->
+	@dialog.Dialog(dialog.Props{ID: "error_modal"}) {
+		@dialog.Content(dialog.ContentProps{Class: "sm:max-w-[425px] border-destructive/50"}) {
+			@dialog.Header(dialog.HeaderProps{}) {
+				@dialog.Title(dialog.TitleProps{Class: "text-destructive"}) { 
+					<span x-text="errorTitle"></span>
+				}
+				@dialog.Description(dialog.DescriptionProps{}) { System Alert }
+			}
+			<div class="py-4">
+				<div class="bg-destructive/10 text-destructive p-4 rounded-md border border-destructive/20 font-mono text-xs break-all">
+					<p x-text="errorMessage"></p>
+				</div>
+			</div>
+			@dialog.Footer(dialog.FooterProps{}) {
+				@dialog.Close(dialog.CloseProps{}) {
+					@button.Button(button.Props{Variant: button.VariantDefault, Class: "w-full"}) { I Understand }
+				}
+			}
+		}
+	}
+
+	<!-- Import Modal -->
+	@dialog.Dialog(dialog.Props{ID: "import_modal"}) {
+		@dialog.Content(dialog.ContentProps{Class: "sm:max-w-[500px]"}) {
+			@dialog.Header(dialog.HeaderProps{}) {
+				@dialog.Title(dialog.TitleProps{}) { Inject Specification }
+				@dialog.Description(dialog.DescriptionProps{}) { Load external OpenAPI/Swagger definitions }
+			}
+			
+			<div class="space-y-4 py-4">
+				<div class="space-y-2">
+					<label class="text-xs font-bold text-muted-foreground">Source File</label>
+					<input type="file" id="openapi_file" accept=".json,.yaml,.yml"
+						class="w-full bg-background border border-input rounded-md px-3 py-2 text-sm file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-bold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 cursor-pointer"
+						@change="handleFileSelect($event)" />
+				</div>
+
+				<div class="flex items-center justify-between p-4 bg-muted/50 rounded-md border">
+					<div class="space-y-0.5">
+						<p class="text-xs font-bold">Merge Configurations</p>
+						<p class="text-[10px] text-muted-foreground">Integrate with current mocks</p>
+					</div>
+					<input type="checkbox" x-model="importMerge" class="w-4 h-4 rounded border-input bg-background text-primary focus:ring-ring" />
+				</div>
+
+				<div x-show="importFileName" class="p-3 bg-primary/10 text-primary rounded-md border border-primary/20 text-xs flex items-center gap-2">
+					<div class="px-1.5 py-0.5 bg-primary text-primary-foreground text-[9px] font-bold rounded">FILE</div>
+					<span class="truncate font-medium" x-text="importFileName"></span>
+				</div>
+			</div>
+
+			@dialog.Footer(dialog.FooterProps{Class: "grid grid-cols-2 gap-2 sm:space-x-0"}) {
+				@dialog.Close(dialog.CloseProps{}) {
+					@button.Button(button.Props{Variant: button.VariantGhost, Class: "w-full"}) { Abort }
+				}
+				@button.Button(button.Props{
+					Variant: button.VariantDefault,
+					Class: "w-full",
+					Attributes: templ.Attributes{
+						"@click": "importOpenAPI()",
+						":disabled": "!importFile || importLoading",
+					},
+				}) {
+					<template x-if="!importLoading">
+						<span>Execute</span>
+					</template>
+					<template x-if="importLoading">
+						<i class="ri-loader-4-line animate-spin text-lg"></i>
+					</template>
+				}
+			}
+		}
+	}
+
+	<!-- Floating Save Button -->
+	<div class="fixed bottom-6 right-6 z-[100]">
+		@button.Button(button.Props{
+			Variant: button.VariantDefault,
+			Size:    button.SizeLg,
+			Class:   "rounded-full h-14 px-8 shadow-2xl shadow-primary/20 gap-3 border-2 border-background",
+			Attributes: templ.Attributes{"@click": "saveAll()"},
+		}) {
+			<i class="ri-save-3-line text-lg"></i>
+			<span class="font-bold tracking-wider">SAVE ALL</span>
+			<div class="absolute -top-1 -right-1 flex h-3 w-3">
+				<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+				<span class="relative inline-flex rounded-full h-3 w-3 bg-primary"></span>
+			</div>
+		}
+	</div>
+}

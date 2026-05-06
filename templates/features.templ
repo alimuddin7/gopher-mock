@@ -1,0 +1,62 @@
+package templates
+
+import (
+	"github.com/templui/templui/components/dialog"
+)
+
+templ Features() {
+	@dialog.Dialog(dialog.Props{ID: "features_modal"}) {
+		@dialog.Content(dialog.ContentProps{Class: "sm:max-w-[700px]"}) {
+			@dialog.Header(dialog.HeaderProps{}) {
+				@dialog.Title(dialog.TitleProps{}) { Platform Features }
+				@dialog.Description(dialog.DescriptionProps{}) { System Capabilities & Core Tools }
+			}
+			
+			<div class="grid grid-cols-1 md:grid-cols-2 gap-4 py-6">
+				<!-- Feature 1 -->
+				<div class="flex items-start gap-4 p-4 rounded-lg bg-muted/50 border border-transparent hover:border-border transition-all">
+					<div class="w-10 h-10 rounded-md bg-primary/10 text-primary flex items-center justify-center shrink-0">
+						<i class="ri-shield-check-line text-xl"></i>
+					</div>
+					<div class="space-y-1">
+						<h4 class="text-sm font-bold">Conditional Engine</h4>
+						<p class="text-xs text-muted-foreground leading-relaxed">Logic-based responses using JSON body, headers, or parameters.</p>
+					</div>
+				</div>
+
+				<!-- Feature 2 -->
+				<div class="flex items-start gap-4 p-4 rounded-lg bg-muted/50 border border-transparent hover:border-border transition-all">
+					<div class="w-10 h-10 rounded-md bg-primary/10 text-primary flex items-center justify-center shrink-0">
+						<i class="ri-upload-cloud-2-line text-xl"></i>
+					</div>
+					<div class="space-y-1">
+						<h4 class="text-sm font-bold">OpenAPI Integration</h4>
+						<p class="text-xs text-muted-foreground leading-relaxed">Instantly generate mocks from OpenAPI 3.x and Swagger specs.</p>
+					</div>
+				</div>
+
+				<!-- Feature 3 -->
+				<div class="flex items-start gap-4 p-4 rounded-lg bg-muted/50 border border-transparent hover:border-border transition-all">
+					<div class="w-10 h-10 rounded-md bg-primary/10 text-primary flex items-center justify-center shrink-0">
+						<i class="ri-time-line text-xl"></i>
+					</div>
+					<div class="space-y-1">
+						<h4 class="text-sm font-bold">Latency Simulation</h4>
+						<p class="text-xs text-muted-foreground leading-relaxed">Simulate network delays and timeouts for resilience testing.</p>
+					</div>
+				</div>
+
+				<!-- Feature 4 -->
+				<div class="flex items-start gap-4 p-4 rounded-lg bg-muted/50 border border-transparent hover:border-border transition-all">
+					<div class="w-10 h-10 rounded-md bg-primary/10 text-primary flex items-center justify-center shrink-0">
+						<i class="ri-file-copy-line text-xl"></i>
+					</div>
+					<div class="space-y-1">
+						<h4 class="text-sm font-bold">Bulk Operations</h4>
+						<p class="text-xs text-muted-foreground leading-relaxed">Manage your catalog with multi-select deletion and duplication.</p>
+					</div>
+				</div>
+			</div>
+		}
+	}
+}
