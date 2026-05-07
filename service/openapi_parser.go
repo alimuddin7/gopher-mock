@@ -401,7 +401,7 @@ func generateExampleFromSchema(schema *openapi3.Schema) map[string]interface{} {
 			} else if propSchema.Default != nil {
 				result[propName] = propSchema.Default
 			} else {
-				result[propName] = 0
+				result[propName] = "{{faker.number}}"
 			}
 		case "boolean":
 			if propSchema.Default != nil {
