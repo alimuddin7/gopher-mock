@@ -51,6 +51,12 @@ func main() {
 	app.Post("/import-openapi", h.ImportOpenAPI)
 	app.Post("/delete-config/:index", h.Delete)
 	app.Post("/delete-configs", h.BulkDelete)
+
+	// ── Request-log API (must be before the wildcard) ──────────────
+	app.Get("/api/logs", h.LogAPI)
+	app.Delete("/api/logs", h.ClearLogs)
+	app.Get("/api/logs/stream", h.LogStream)
+
 	app.All("/*", h.RequestResponseLogger(), h.Dynamic)
 
 	log.Fatal(app.Listen(":3000"))

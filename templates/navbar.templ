@@ -22,6 +22,16 @@ templ Navbar() {
 				Features
 			</button>
 
+			<button
+				@click="$dispatch('open-logs')"
+				class="relative flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors px-3 h-8 rounded-md hover:bg-accent">
+				<span class="relative flex h-2 w-2">
+					<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+					<span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+				</span>
+				Logs
+			</button>
+
 			@button.Button(button.Props{
 				Variant: button.VariantOutline,
 				Size:    button.SizeSm,

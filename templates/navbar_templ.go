@@ -42,7 +42,7 @@ func Navbar() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<a href=\"/\" class=\"flex items-center gap-2\"><img src=\"/static/logo.png\" alt=\"GopherMock\" class=\"h-6 w-6 object-contain\"> <span class=\"text-sm font-bold tracking-tight\">Gopher<span class=\"text-primary italic\">Mock</span></span></a></div><div class=\"flex items-center gap-2\"><button @click=\"openFeaturesModal()\" class=\"text-xs font-medium text-muted-foreground hover:text-foreground transition-colors px-3 h-8 rounded-md hover:bg-accent\">Features</button>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<a href=\"/\" class=\"flex items-center gap-2\"><img src=\"/static/logo.png\" alt=\"GopherMock\" class=\"h-6 w-6 object-contain\"> <span class=\"text-sm font-bold tracking-tight\">Gopher<span class=\"text-primary italic\">Mock</span></span></a></div><div class=\"flex items-center gap-2\"><button @click=\"openFeaturesModal()\" class=\"text-xs font-medium text-muted-foreground hover:text-foreground transition-colors px-3 h-8 rounded-md hover:bg-accent\">Features</button> <button @click=\"$dispatch('open-logs')\" class=\"relative flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors px-3 h-8 rounded-md hover:bg-accent\"><span class=\"relative flex h-2 w-2\"><span class=\"animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75\"></span> <span class=\"relative inline-flex rounded-full h-2 w-2 bg-emerald-500\"></span></span> Logs</button>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"bufio"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -8,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -19,12 +21,20 @@ import (
 	"gopher-mock/templates"
 )
 
+var logIDCounter uint64
+
+func nextLogID() string {
+	n := atomic.AddUint64(&logIDCounter, 1)
+	return fmt.Sprintf("%d-%d", time.Now().UnixNano(), n)
+}
+
 // MockHandler ...
 type MockHandler struct {
 	mu      sync.RWMutex
 	Configs []model.MockConfig
 	Path    string
 	Log     zerolog.Logger
+	Logs    *LogStore
 }
 
 // NewMockHandler ...
@@ -45,6 +55,7 @@ func NewMockHandler(path string) *MockHandler {
 		Configs: cfgs,
 		Path:    path,
 		Log:     zerolog.New(os.Stdout).With().Timestamp().Logger(),
+		Logs:    NewLogStore(500),
 	}
 }
 
@@ -390,23 +401,24 @@ func pathMatch(cfgPath, reqPath string) (bool, map[string]string) {
 	return true, params
 }
 
-// RequestResponseLogger ...
+// RequestResponseLogger logs every dynamic request and stores it in the ring buffer.
 func (h *MockHandler) RequestResponseLogger() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		start := time.Now()
-
 		reqHeaders := c.GetReqHeaders()
 		reqBody := c.Body()
 
 		err := c.Next()
 
+		duration := time.Since(start)
 		resBody := c.Response().Body()
+		statusCode := c.Response().StatusCode()
 
+		// ----- zerolog stdout (as before) -----
 		event := h.Log.Info().
 			Str("METHOD", c.Method()).
 			Str("URL", c.OriginalURL()).
 			Any("HEAD", reqHeaders)
-
 		if len(reqBody) > 0 {
 			if json.Valid(reqBody) {
 				event = event.RawJSON("BODY", reqBody)
@@ -414,7 +426,6 @@ func (h *MockHandler) RequestResponseLogger() fiber.Handler {
 				event = event.Str("BODY", string(reqBody))
 			}
 		}
-
 		if len(resBody) > 0 {
 			if json.Valid(resBody) {
 				event = event.RawJSON("RES", resBody)
@@ -422,17 +433,102 @@ func (h *MockHandler) RequestResponseLogger() fiber.Handler {
 				event = event.Str("RES", string(resBody))
 			}
 		}
-
-		event = event.Dur("DURATION", time.Since(start))
-
+		event = event.Dur("DURATION", duration)
 		if err != nil {
 			event = event.Err(err)
 		}
-
 		event.Msg("API LOG")
 
+		// ----- push to in-memory store -----
+		// flatten request headers
+		flatHeaders := make(map[string]string, len(reqHeaders))
+		for k, vals := range reqHeaders {
+			if len(vals) > 0 {
+				flatHeaders[k] = vals[0]
+			}
+		}
+		var reqBodyParsed interface{} = nil
+		if len(reqBody) > 0 {
+			if json.Valid(reqBody) {
+				_ = json.Unmarshal(reqBody, &reqBodyParsed)
+			} else {
+				reqBodyParsed = string(reqBody)
+			}
+		}
+		var resBodyParsed interface{} = nil
+		if len(resBody) > 0 {
+			if json.Valid(resBody) {
+				_ = json.Unmarshal(resBody, &resBodyParsed)
+			} else {
+				resBodyParsed = string(resBody)
+			}
+		}
+		errStr := ""
+		if err != nil {
+			errStr = err.Error()
+		}
+		matched := statusCode != 404
+		h.Logs.Add(model.RequestLog{
+			ID:         nextLogID(),
+			Timestamp:  time.Now(),
+			Method:     c.Method(),
+			URL:        c.OriginalURL(),
+			StatusCode: statusCode,
+			DurationMs: float64(duration.Microseconds()) / 1000.0,
+			ReqHeaders: flatHeaders,
+			ReqBody:    reqBodyParsed,
+			ResBody:    resBodyParsed,
+			Matched:    matched,
+			Error:      errStr,
+		})
 		return err
 	}
+}
+
+// LogAPI returns all stored request logs as JSON.
+func (h *MockHandler) LogAPI(c *fiber.Ctx) error {
+	entries := h.Logs.GetAll()
+	if entries == nil {
+		entries = []model.RequestLog{}
+	}
+	return c.JSON(entries)
+}
+
+// ClearLogs removes all stored request logs.
+func (h *MockHandler) ClearLogs(c *fiber.Ctx) error {
+	h.Logs.Clear()
+	return c.JSON(fiber.Map{"success": true, "message": "Logs cleared"})
+}
+
+// LogStream streams new log entries to the client via Server-Sent Events.
+func (h *MockHandler) LogStream(c *fiber.Ctx) error {
+	c.Set("Content-Type", "text/event-stream")
+	c.Set("Cache-Control", "no-cache")
+	c.Set("Connection", "keep-alive")
+	c.Set("X-Accel-Buffering", "no")
+
+	ch := h.Logs.Subscribe()
+
+	c.Context().SetBodyStreamWriter(func(w *bufio.Writer) {
+		defer h.Logs.Unsubscribe(ch)
+		// send an initial ping so the client knows connection is alive
+		_, _ = fmt.Fprintf(w, ": ping\n\n")
+		_ = w.Flush()
+		for entry := range ch {
+			data, err := json.Marshal(entry)
+			if err != nil {
+				continue
+			}
+			_, werr := fmt.Fprintf(w, "data: %s\n\n", data)
+			if werr != nil {
+				return
+			}
+			if ferr := w.Flush(); ferr != nil {
+				return
+			}
+		}
+	})
+	return nil
 }
 
 // parseJSONOrString is replaced by more efficient logic in Logger

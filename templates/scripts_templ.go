@@ -62,7 +62,7 @@ func Scripts(configs []model.MockConfig) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</div><script src=\"/static/js/app.js\"></script><script>\n\t\twindow.serverConfigs = JSON.parse(document.getElementById('server-configs').textContent);\n\t</script>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</div><script src=\"/static/js/app.js\"></script><script src=\"/static/js/logs.js\"></script><script>\n\t\twindow.serverConfigs = JSON.parse(document.getElementById('server-configs').textContent);\n\t</script>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
