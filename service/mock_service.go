@@ -50,7 +50,7 @@ func RenderTemplateRecursive(data interface{}, bodyMap, headerMap, queryMap, pat
 						return val
 					}
 				case "header":
-					if val, ok := headerMap[key]; ok {
+					if val, ok := headerMap[strings.ToLower(key)]; ok {
 						return val
 					}
 				case "query":
@@ -86,9 +86,11 @@ func RenderTemplateRecursive(data interface{}, bodyMap, headerMap, queryMap, pat
 		}
 		return result
 	case []interface{}:
+		result := make([]interface{}, len(v))
 		for i, val := range v {
-			v[i] = RenderTemplateRecursive(val, bodyMap, headerMap, queryMap, pathMap)
+			result[i] = RenderTemplateRecursive(val, bodyMap, headerMap, queryMap, pathMap)
 		}
+		return result
 	}
 	return data
 }

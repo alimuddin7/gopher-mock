@@ -290,33 +290,26 @@ func (h *MockHandler) Dynamic(c *fiber.Ctx) error {
 				}
 
 				// Backward compatibility: use old format
-				// Validate headers
-				headerMap := map[string]string{}
+				// Validate required headers from config
 				for k := range cfg.RequestHeaders {
-					val := c.Get(k)
-					if val == "" {
+					if c.Get(k) == "" {
 						return c.Status(400).JSON(fiber.Map{"error": "missing header: " + k})
 					}
-					headerMap[k] = val
 				}
 
-				bodyMap := map[string]interface{}{}
-				if (method == "POST" || method == "PUT") && cfg.RequestBody != nil {
-					if err := c.BodyParser(&bodyMap); err != nil {
-						return c.Status(400).JSON(fiber.Map{"error": "invalid body"})
-					}
+				// Validate required body fields from config
+				if (method == "POST" || method == "PUT" || method == "PATCH") && cfg.RequestBody != nil {
 					for k := range cfg.RequestBody {
-						if _, ok := bodyMap[k]; !ok {
+						if _, ok := ctx.Body[k]; !ok {
+							// Check if it exists in the original body (as interface{})
+							// Since buildRequestContext already parsed it into ctx.Body (string map),
+							// we just check ctx.Body.
 							return c.Status(400).JSON(fiber.Map{"error": "missing body field: " + k})
 						}
 					}
 				}
-				queryMap := make(map[string]string)
-				c.Request().URI().QueryArgs().VisitAll(func(k, v []byte) {
-					queryMap[string(k)] = string(v)
-				})
 
-				rendered := service.RenderTemplateRecursive(cfg.ResponseBody, service.MapToStringMap(bodyMap), headerMap, queryMap, params)
+				rendered := service.RenderTemplateRecursive(cfg.ResponseBody, ctx.Body, ctx.Headers, ctx.Query, ctx.PathParams)
 
 				for k, v := range cfg.ResponseHeaders {
 					c.Set(k, v)
@@ -336,15 +329,16 @@ func (h *MockHandler) Dynamic(c *fiber.Ctx) error {
 
 // buildRequestContext extracts request data into a RequestContext for rule evaluation
 func buildRequestContext(c *fiber.Ctx, pathParams map[string]string) service.RequestContext {
-	// Extract headers
+	// Extract headers (lowercase keys for case-insensitive lookup)
 	headerMap := make(map[string]string)
 	c.Request().Header.VisitAll(func(key, value []byte) {
-		headerMap[string(key)] = string(value)
+		headerMap[strings.ToLower(string(key))] = string(value)
 	})
 
 	// Extract body
 	bodyMap := make(map[string]interface{})
 	if c.Method() == "POST" || c.Method() == "PUT" || c.Method() == "PATCH" {
+		// Use BodyParser which is safe to call multiple times in Fiber
 		_ = c.BodyParser(&bodyMap)
 	}
 
