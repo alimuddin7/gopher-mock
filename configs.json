@@ -15,40 +15,13 @@
     "method": "POST",
     "path": "/api/test_2",
     "requestHeaders": {},
-    "requestBody": {
-      "data": "abc"
-    },
+    "requestBody": {},
     "responseHeaders": {},
     "responseBody": {
-      "data": true
+      "data": "{{body.data.merchant.name}}"
     },
     "statusCode": 200,
-    "timeout": 0,
-    "responses": [
-      {
-        "name": "False Response",
-        "rules": [
-          {
-            "target": "body",
-            "field": "data",
-            "operator": "!=",
-            "value": "abc"
-          }
-        ],
-        "ruleOperator": "AND",
-        "response": {
-          "headers": {},
-          "body": {
-            "data": false,
-            "email": "{{faker.email}}",
-            "error": "{{body.data}}",
-            "name": "{{faker.name}}"
-          },
-          "statusCode": 200,
-          "timeout": 200
-        }
-      }
-    ]
+    "timeout": 0
   },
   {
     "name": "Path params coba aja banyakin ahhh",
@@ -99,7 +72,7 @@
     "requestBody": {},
     "responseHeaders": {},
     "responseBody": {
-      "data": "success"
+      "data": "{{body.data}}"
     },
     "statusCode": 200,
     "timeout": 0
@@ -317,12 +290,6 @@
     "responseHeaders": {},
     "responseBody": {},
     "statusCode": 200,
-    "timeout": 0,
-    "defaultResponse": {
-      "headers": {},
-      "body": {},
-      "statusCode": 200,
-      "timeout": 0
-    }
+    "timeout": 0
   }
 ]

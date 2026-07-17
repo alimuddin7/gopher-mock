@@ -2,6 +2,7 @@ package handler
 
 import (
 	"bufio"
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -335,10 +336,9 @@ func buildRequestContext(c *fiber.Ctx, pathParams map[string]string) service.Req
 		headerMap[strings.ToLower(string(key))] = string(value)
 	})
 
-	// Extract body
+	// Extract body (parse for all methods to support body templates)
 	bodyMap := make(map[string]interface{})
-	if c.Method() == "POST" || c.Method() == "PUT" || c.Method() == "PATCH" {
-		// Use BodyParser which is safe to call multiple times in Fiber
+	if len(c.Body()) > 0 {
 		_ = c.BodyParser(&bodyMap)
 	}
 
@@ -349,7 +349,7 @@ func buildRequestContext(c *fiber.Ctx, pathParams map[string]string) service.Req
 	})
 
 	return service.RequestContext{
-		Body:       service.MapToStringMap(bodyMap),
+		Body:       service.FlattenMap(bodyMap, ""),
 		Headers:    headerMap,
 		Query:      queryMap,
 		PathParams: pathParams,
@@ -415,14 +415,24 @@ func (h *MockHandler) RequestResponseLogger() fiber.Handler {
 			Any("HEAD", reqHeaders)
 		if len(reqBody) > 0 {
 			if json.Valid(reqBody) {
-				event = event.RawJSON("BODY", reqBody)
+				var buf bytes.Buffer
+				if json.Compact(&buf, reqBody) == nil {
+					event = event.RawJSON("BODY", buf.Bytes())
+				} else {
+					event = event.RawJSON("BODY", reqBody)
+				}
 			} else {
 				event = event.Str("BODY", string(reqBody))
 			}
 		}
 		if len(resBody) > 0 {
 			if json.Valid(resBody) {
-				event = event.RawJSON("RES", resBody)
+				var buf bytes.Buffer
+				if json.Compact(&buf, resBody) == nil {
+					event = event.RawJSON("RES", buf.Bytes())
+				} else {
+					event = event.RawJSON("RES", resBody)
+				}
 			} else {
 				event = event.Str("RES", string(resBody))
 			}

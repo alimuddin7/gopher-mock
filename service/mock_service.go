@@ -9,7 +9,7 @@ import (
 )
 
 var fakerRegex = regexp.MustCompile(`\{\{faker\.([a-zA-Z0-9_]+)\}\}`)
-var templateRegex = regexp.MustCompile(`\{\{(body|header|query|path)\.([a-zA-Z0-9_-]+)\}\}`)
+var templateRegex = regexp.MustCompile(`\{\{(body|header|query|path)\.([a-zA-Z0-9_\.\-]+)\}\}`)
 
 var fakerMap = map[string]func() string{
 	"name":          gofakeit.Name,
@@ -100,6 +100,40 @@ func MapToStringMap(input map[string]interface{}) map[string]string {
 	output := make(map[string]string)
 	for k, v := range input {
 		output[k] = fmt.Sprintf("%v", v)
+	}
+	return output
+}
+
+// FlattenMap recursively flattens a nested map into dot-notation keys.
+// e.g. {"merchant": {"name": "Test"}} becomes {"merchant.name": "Test"}
+func FlattenMap(input map[string]interface{}, prefix string) map[string]string {
+	output := make(map[string]string)
+	for k, v := range input {
+		fullKey := k
+		if prefix != "" {
+			fullKey = prefix + "." + k
+		}
+		switch val := v.(type) {
+		case map[string]interface{}:
+			for nk, nv := range FlattenMap(val, fullKey) {
+				output[nk] = nv
+			}
+		case []interface{}:
+			for i, item := range val {
+				arrayKey := fmt.Sprintf("%s.%d", fullKey, i)
+				switch arrVal := item.(type) {
+				case map[string]interface{}:
+					for nk, nv := range FlattenMap(arrVal, arrayKey) {
+						output[nk] = nv
+					}
+				default:
+					output[arrayKey] = fmt.Sprintf("%v", arrVal)
+				}
+			}
+			output[fullKey] = fmt.Sprintf("%v", v)
+		default:
+			output[fullKey] = fmt.Sprintf("%v", v)
+		}
 	}
 	return output
 }
